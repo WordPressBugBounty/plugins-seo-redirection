@@ -4,7 +4,96 @@ if (!defined('ABSPATH'))
 global $wpdb, $table_prefix, $util;
 $table_name = $table_prefix . 'WP_SEO_Redirection';
 
+$redirect_from = isset($_GET['redirect_from']) ? sanitize_text_field($_GET['redirect_from']) : '';
 
+// Check if `redirect_from` exists in the table
+$query = $wpdb->prepare("SELECT * FROM $table_name WHERE redirect_from = %s", $redirect_from);
+$existing_redirect = $wpdb->get_row($query);
+
+// Check if we are editing or adding
+$is_edit = !empty($existing_redirect); // True if an existing redirect is found
+
+?>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        var redirectFrom = "<?php echo esc_js($redirect_from); ?>";
+        var isEdit = "<?php echo $is_edit ? 'true' : 'false'; ?>";
+
+        if (redirectFrom !== "") {
+            // If coming from an edit link (with redirect_from)
+            if (isEdit === 'true') {
+                // Automatically simulate clicking an edit button to open the modal
+                setTimeout(function() {
+                    loadEditForm(<?php echo json_encode($existing_redirect); ?>); // Pass the existing redirect data
+                }, 500);
+            }
+        }
+    });
+
+    // Function to load the edit form with existing data and trigger the modal
+    function loadEditForm(existingRedirect) {
+        clr(); // Clear any previous form data
+        $('#edit').val(existingRedirect.ID); // Set edit ID in the form
+        $('#add_new').val("");
+        $('#edit_exist').val("1");
+        $('#myModal').modal('show'); // Show the modal for editing
+        $('.modal-title').text('Edit Custom Redirection'); // Set modal title to Edit
+        $('#btnSave').val('Update'); // Set the save button to 'Update'
+
+        // Populate the form with the data
+        $('#redirect_from_type').val(existingRedirect.redirect_from_type);
+        $('#redirect_from').val(existingRedirect.redirect_from);
+        $('#redirect_from_folder_settings').val(existingRedirect.redirect_from_folder_settings > 0 ? existingRedirect.redirect_from_folder_settings : 1);
+        $('#redirect_from_subfolders').val(existingRedirect.redirect_from_subfolders);
+        $('#redirect_to_type').val(existingRedirect.redirect_to_type);
+        $('#redirect_to').val(existingRedirect.redirect_to);
+        $('#redirect_to_folder_settings').val(existingRedirect.redirect_to_folder_settings);
+        $('#redirect_type').val(existingRedirect.redirect_type);
+
+        redirect_from_type_change(); // Update form UI based on redirection type
+    }
+</script>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        var redirectFrom = "<?php echo esc_js($redirect_from); ?>";
+        var isEdit = "<?php echo $is_edit ? 'true' : 'false'; ?>";
+
+        if (redirectFrom !== "") {
+            // Add a delay before simulating the click
+            setTimeout(function() {
+                if (isEdit === 'true') {
+                    // This is an edit action, so simulate the edit button click
+                    document.querySelector('.btn-edit').click(); // Assuming you have an edit button to trigger the modal
+                } else {
+                    // This is an add action, simulate clicking the "Add New" button using its ID
+                    document.getElementById('add_modal').click(); // Trigger the add modal using the specific ID
+                }
+
+                // Wait for the modal to open and the form to initialize, then populate the fields
+                setTimeout(function() {
+                    if (isEdit === 'true') {
+                        <?php if (!empty($existing_redirect)): ?>
+                            document.getElementById('redirect_from').value = "<?php echo esc_js($existing_redirect->redirect_from); ?>";
+                            document.getElementById('redirect_to').value = "<?php echo esc_js($existing_redirect->redirect_to); ?>";
+                            document.getElementById('redirect_type').value = "<?php echo esc_js($existing_redirect->redirect_type); ?>";
+                            document.getElementById('enabled').value = "<?php echo esc_js($existing_redirect->enabled); ?>";
+                        <?php endif; ?>
+                        document.getElementById('edit').value = "1"; // Set to indicate it's an edit operation
+                        document.getElementById('btnSave').value = "<?php _e('Update', 'seo-redirection'); ?>"; // Change button to 'Update'
+                    } else {
+                        document.getElementById('redirect_from').value = redirectFrom;
+                        document.getElementById('redirect_from_type').value = "Page"; // Default to 'Page'
+                        document.getElementById('edit').value = "0"; // Set to indicate it's an add operation
+                        document.getElementById('btnSave').value = "<?php _e('Add New', 'seo-redirection'); ?>"; // Set button to 'Add New'
+                    }
+                }, 300); // Add a slight delay to allow the modal to fully initialize
+
+            }, 500); // Add a delay before simulating the button click (500ms)
+        }
+    });
+</script>
+
+<?php
 
 $rlink = $util->WPSR_get_current_parameters(array('search', 'page_num', 'add', 'edit', 'tab'));
 
@@ -195,7 +284,7 @@ $redirect_to = isset($redirect_to) ? $redirect_to : '';
 
     <table border="0" width="100%">
         <tr>
-            <td> <button type="button" class="button-secondary btn-custom btn-add" onclick="add_rec()">
+            <td> <button id = "add_modal" type="button" class="button-secondary btn-custom btn-add" onclick="add_rec()">
                     <span style="padding-top: 5px;" class="dashicons dashicons-plus"></span><?php _e('Add New', 'seo-redirection') ?>
                 </button>
 

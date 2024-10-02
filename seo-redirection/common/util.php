@@ -63,8 +63,9 @@ public function post($key,$type='text')
 public function sanitize_req($unsafe_val,$type='text')
 {
 	 switch ($type) {
-	   case 'text': return  filter_var($unsafe_val, FILTER_SANITIZE_STRING);// sanitize_text_field($unsafe_val);
-	   break;
+		case 'text': 
+			return htmlspecialchars($unsafe_val, ENT_QUOTES, 'UTF-8', false);
+			   break;
 	   
 	   case 'int': return intval($unsafe_val);
 	   break;
@@ -75,15 +76,16 @@ public function sanitize_req($unsafe_val,$type='text')
 	   case 'filename': return sanitize_file_name($unsafe_val);
 	   break;
 	   
-           case 'title': return  filter_var($unsafe_val, FILTER_SANITIZE_STRING);//sanitize_title($unsafe_val);
-	   break;
+	   case 'title': 
+		return htmlspecialchars($unsafe_val, ENT_QUOTES, 'UTF-8', false);
+		   break;
        
             case 'url' : return  filter_var($unsafe_val, FILTER_SANITIZE_SPECIAL_CHARS);//sanitize_title($unsafe_val);
 	   break;
        	      
-	   default:
-           //return sanitize_text_field($unsafe_val);
-               return filter_var($unsafe_val, FILTER_SANITIZE_STRING);
+	   default: 
+    return htmlspecialchars($unsafe_val, ENT_QUOTES, 'UTF-8', false);
+
                
             // filter_var($var, FILTER_SANITIZE_URL)
             // FILTER_SANITIZE_STRING

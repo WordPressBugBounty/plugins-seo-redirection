@@ -4,7 +4,7 @@ Plugin Name: SEO Redirection
 Plugin URI: https://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin/
 Description: By this plugin you can manage all your website redirection types easily.
 Author: wp-buy
-Version: 9.5
+Version: 9.6
 Author URI: https://www.wp-buy.com
 Text Domain: seo-redirection
 */
@@ -54,6 +54,221 @@ function WPSR__filter_action_links( $links ) {
 add_filter( 'plugin_action_links_'.plugin_basename(__FILE__), 'WPSR__filter_action_links', 10, 1 );
 }
 
+/////////////////////////////////////////////////////////////////////////
+if (!function_exists("WPSR_add_link_to_admin_bar")) {
+    function WPSR_add_link_to_admin_bar($wp_admin_bar) {
+        global $wpdb;
+
+        if (!is_admin_bar_showing()) {
+            return;
+        }
+
+        $table_name = $wpdb->prefix . 'WP_SEO_Redirection';
+
+        $current_url = (is_ssl() ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        $relative_url = str_replace(home_url(), '', $current_url);
+
+        $wp_admin_bar->add_node(array(
+            'id'    => 'seo_redirection',
+            'title' => '<img src="' . plugins_url( 'icon.png', __FILE__ ) . '" class="seo-redirection-icon" alt="Icon" /> SEO Redirection',
+            'href'  => '#', 
+            'meta'  => array(
+                'class' => 'seo-redirection-admin-bar',  // Add a custom CSS class
+            ),
+        ));
+
+        // Check if we are on an admin page or not
+        if (is_admin()) {
+            // Fetch the total number of 404 errors
+            $total_404_errors = WPSR_Get_total_404();
+             // Format the number with commas for readability
+             $formatted_404_errors = number_format($total_404_errors);
+
+            // Admin pages sub-nodes
+            $wp_admin_bar->add_node(array(
+                'id'     => 'manage_redirects',
+                'title'  => 'Manage Redirects',
+                'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=cutom'), 
+                'parent' => 'seo_redirection', 
+            ));
+
+            $wp_admin_bar->add_node(array(
+                'id'     => 'post_redirects',
+                'title'  => 'Post Redirects',
+                'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=posts'), 
+                'parent' => 'seo_redirection', 
+            ));
+
+            $wp_admin_bar->add_node(array(
+                'id'     => 'history_redirects',
+                'title'  => 'History',
+                'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=history'), 
+                'parent' => 'seo_redirection', 
+            ));
+
+            // Add the 404 errors node with a dynamic total and red background
+            $wp_admin_bar->add_node(array(
+                'id'     => 'manage_404_errors',
+                'title'  => '404 Errors (' . $formatted_404_errors . ')',  // Display number of 404 errors with formatting
+                'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=404'), 
+                'parent' => 'seo_redirection', 
+                'meta'   => array(
+                    'class' => 'wpsr-404-errors-admin-bar',  // Custom class for styling
+                ),
+            ));
+
+        } else {
+            // Front-end sub-nodes (same as your original function)
+            $result = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE redirect_from = %s", $relative_url));
+
+            if (!empty($result)) {
+                $wp_admin_bar->add_node(array(
+                    'id'     => 'edit_redirection',
+                    'title'  => 'Edit Redirection',
+                    'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=cutom&redirect_from=' . $relative_url ), 
+                    'parent' => 'seo_redirection', 
+                ));
+
+                $wp_admin_bar->add_node(array(
+                    'id'     => 'view_history',
+                    'title'  => 'View History',
+                    'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=history'), 
+                    'parent' => 'seo_redirection', 
+                ));
+            } else {
+                $wp_admin_bar->add_node(array(
+                    'id'     => 'add_redirection',
+                    'title'  => 'Redirect this page',
+                    'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=cutom&redirect_from=' . $relative_url), 
+                    'parent' => 'seo_redirection', 
+                ));
+            }
+        }
+    }
+
+    add_action('admin_bar_menu', 'WPSR_add_link_to_admin_bar', 999);
+}
+/////////////////////////////////////////////////////////////////////////
+
+function custom_admin_bar_styles() {
+    if (is_admin_bar_showing()) {
+        echo '<style>
+            #wp-admin-bar-seo_redirection > .ab-item {
+                background-color: #114e0e; /* Light green background color */
+                color: white;
+                display: flex;
+                align-items: center;
+                padding: 0 10px; /* Add padding for better alignment */
+            }
+
+            #wp-admin-bar-seo_redirection > .ab-item:hover {
+                background-color: #7ccd7c; /* Darker green on hover */
+            }
+
+            .wpsr-404-notice {
+                border-left: 4px solid red;
+                padding: 15px;
+                background-color: #ffebe6; /* Light red background */
+            }
+
+            .wpsr-404-notice .button-primary {
+                background-color: orange;
+                border-color: orange;
+            }
+
+            #wp-admin-bar-seo_redirection .seo-redirection-icon {
+                width: 20px !important;  /* Resize the image to a smaller size */
+                height: 20px !important; /* Keep it proportional */
+                vertical-align: middle; /* Align icon vertically */
+            }
+
+            #wp-admin-bar-seo_redirection .ab-item .seo-redirection-icon {
+                max-width: 100%;
+                max-height: 100%; 
+            }
+
+            /* Custom style for the 404 node with red background */
+            #wp-admin-bar-manage_404_errors > .ab-item {
+                background-color: red; /* Red background for the 404 node */
+                color: white;          /* White text color */
+                font-weight: bold;     /* Bold text to highlight the 404 count */
+            }
+
+            #wp-admin-bar-manage_404_errors > .ab-item:hover {
+                background-color: darkred; /* Darker red on hover */
+            }
+          </style>';
+    }
+}
+
+// Apply styles to the front-end
+add_action('wp_head', 'custom_admin_bar_styles');
+
+// Apply styles to the admin dashboard
+add_action('admin_head', 'custom_admin_bar_styles');
+
+
+
+/////////////////////////////////////////////////////////////////////////
+if(!function_exists(function: "wpsr_dashboard_notice")) {
+
+    function wpsr_dashboard_notice() {
+        // Get the total number of 404 errors
+        $total_404_errors = WPSR_Get_total_404();
+    
+        // Only show the notice if there are more than 100 broken links and if the user has not dismissed it
+        if ($total_404_errors > 100 && !get_user_meta(get_current_user_id(), 'wpsr_404_notice_dismissed')) {
+            // Image URL for the icon (Replace with your own uploaded image or the default WordPress icon)
+            $icon_url =plugins_url( 'icon.png', __FILE__ );
+    
+            // Message content with buttons
+            $message = __('<strong>SEO Redirection</strong>: You have', 'seo-redirection') . ' <b style="color:red;     padding:3px;">' . intval($total_404_errors) . '</b>' . __(' broken links (404). Manage them now to fix the issue and improve your site\'s SEO performance.', 'seo-redirection');
+    
+            // Display the message with inline styles
+            echo '
+            <div class="notice notice-error is-dismissible wpsr-404-notice" style="border-left: 4px solid red;  display: flex; align-items: center;">
+                <div style="display: flex; align-items: center;">
+                    <img src="' . esc_url($icon_url) . '" style="margin-right: 15px; width: 40px; height: 40px;" alt="Error icon" />
+                    <div>
+                        <p>' . $message . '</p>
+                        <p>
+                            <a href="' . admin_url('options-general.php?page=seo-redirection.php&tab=404') . '" class="button button-primary" style="background-color: green; border-color: green; margin-right: 10px;">' . __('Fix Now', 'seo-redirection') . '</a>
+                            <button type="button" class="button button-secondary wpsr-dismiss-notice" style="border-color: #0073aa; color: #0073aa;">' . __('Dismiss', 'seo-redirection') . '</button>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            ';
+    
+            // Add the script for handling the dismiss action
+            echo '
+            <script type="text/javascript">
+                jQuery(document).ready(function($) {
+                    $(\'.wpsr-dismiss-notice\').on(\'click\', function() {
+                        var ajaxurl = "' . admin_url('admin-ajax.php') . '";
+                        $.post(ajaxurl, {
+                            action: "wpsr_dismiss_404_notice",
+                            user_id: ' . get_current_user_id() . '
+                        });
+                        $(this).closest(\'.wpsr-404-notice\').remove();
+                    });
+                });
+            </script>
+            ';
+        }
+    }
+    add_action('admin_notices', 'wpsr_dashboard_notice');
+    
+}
+if(!function_exists(function: "wpsr_dismiss_404_notice")) {
+    function wpsr_dismiss_404_notice() {
+        // Update the user meta to mark the notice as dismissed
+        update_user_meta(get_current_user_id(), 'wpsr_404_notice_dismissed', true);
+        wp_die(); // This is required to terminate immediately and return a proper response
+    }
+add_action('wp_ajax_wpsr_dismiss_404_notice', 'wpsr_dismiss_404_notice');
+}
+ //////////////////////////////////////////////////////////////////////////////////////////////////   
 if(!function_exists("WPSR_multiple_plugin_activate_trial")){
     function WPSR_multiple_plugin_activate_trial()
     {
@@ -824,8 +1039,7 @@ if(!function_exists("WPSR_admin_menu")) {
 //---------------------------------------------------------------
 if(!function_exists("WPSR_options_menu")) {
 
-    function WPSR_options_menu()
-    {
+    function WPSR_options_menu(){
         global $util;
 
         if (!current_user_can('manage_options')) {
@@ -838,7 +1052,7 @@ if(!function_exists("WPSR_options_menu")) {
         } else if ($util->get_option_value('plugin_status') == '2') {
             $util->info_option_msg(__('SEO Redirection is', 'seo-redirection') . ' <b>' . __('disabled for admin', 'seo-redirection') . '</b>' . __(' only, you can go to option tab and enable it!', 'seo-redirection'));
         }
-        $total_404_errors = (WPSR_Get_total_404() > 5) ? __('You have', 'seo-redirection') . ' <b  style="color:red; background-color:yellow; padding:3px;">' . intval(WPSR_Get_total_404()) .'</b>' . __(' broken link (404 links)', 'seo-redirection') . ', <br>'.'<div class="wrap" style="font-weight:normal; line-height:30px">' . __('Upgrade to', 'wsr') . ' <a target="_blank" href="https://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin">' . __("pro version", "wsr") . '</a>' . __(" to manage 404 errors and empower your site SEO", "wsr").'</div>' : '';
+        $total_404_errors = (WPSR_Get_total_404() > -1) ? __('You have', 'seo-redirection') . ' <b  style="color:red; background-color:yellow; padding:3px;">' . intval(WPSR_Get_total_404()) .'</b>' . __(' broken link (404 links)', 'seo-redirection') . ', <br>' : '';
 
 
         echo '<div class="wrap"><h2>' . __("SEO Redirection Free", 'seo-redirection') . '</h2><b>' . __('Upgrade to', 'seo-redirection') . ' <a target="_blank" onclick="swal.clickConfirm();" href="https://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin/">' . __("Pro Version", "seo-redirection") . '</a>' . __(" to manage 404 errors and empower your site SEO", "seo-redirection") . '&nbsp;&nbsp;&nbsp;<strong style="color:yellow; background-color:red; padding:3px;"> ' . __("NOW 50% OFF ", 'seo-redirection') . '</strong></b><br/><br/>';
@@ -893,7 +1107,9 @@ if(!function_exists("WPSR_upgrade")) {
         }
     }
 }
+
 //-----------------------------------------------------
+
 if(!function_exists("WPSR_install")) {
 
     function WPSR_install()

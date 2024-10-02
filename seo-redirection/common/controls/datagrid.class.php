@@ -474,7 +474,7 @@ class datagrid
 					foreach ($ar as $key => $value)
 					{
 						$key_var = "db_" . $key;
-						$content=str_ireplace('{' . $key_var . '}', $$key_var , $content);
+						$content = str_ireplace('{' . $key_var . '}', $$key_var ?? '', $content);
 					}
 					$row[$i]= $content;
 				}
