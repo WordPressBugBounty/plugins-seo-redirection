@@ -3,7 +3,7 @@ Contributors: wp-buy, osamaesh
 Tags: 301, 404, redirect, SEO redirection, post redirect
 Requires at least: 4.1
 Tested up to: 6.6.2
-Stable tag: 9.6
+Stable tag: 9.7
 License: GPL
 
 SEO Redirection is a powerful redirect manager to manage 301 redirects without requiring knowledge of Apache .htaccess files.
