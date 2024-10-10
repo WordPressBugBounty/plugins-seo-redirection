@@ -4,7 +4,7 @@ Plugin Name: SEO Redirection
 Plugin URI: https://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin/
 Description: By this plugin you can manage all your website redirection types easily.
 Author: wp-buy
-Version: 9.8
+Version: 9.9
 Author URI: https://www.wp-buy.com
 Text Domain: seo-redirection
 */
@@ -70,12 +70,13 @@ if (!function_exists("WPSR_add_link_to_admin_bar")) {
 
         $wp_admin_bar->add_node(array(
             'id'    => 'seo_redirection',
-            'title' => '<img src="' . plugins_url( 'icon.png', __FILE__ ) . '" class="seo-redirection-icon" alt="Icon" /> SEO Redirection',
+            'title' => '<img src="' . plugins_url( 'icon.png', __FILE__ ) . '" style="width: 20px; height: 20px; vertical-align: middle;" alt="Icon" /> SEO Redirection',
             'href'  => '#', 
             'meta'  => array(
                 'class' => 'seo-redirection-admin-bar',  // Add a custom CSS class
             ),
         ));
+        
 
         // Check if we are on an admin page or not
         if (is_admin()) {
