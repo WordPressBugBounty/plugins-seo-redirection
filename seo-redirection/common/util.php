@@ -1,9 +1,4 @@
 <?php
-/*
-Author: Fakhri Alsadi
-Date: 16-7-2010
-Contact: www.clogica.com   info@clogica.com    mobile: +972599322252
-*/
 
 if(!class_exists('clogica_util_1')){
 class clogica_util_1{
@@ -374,7 +369,9 @@ public function get_visitor_IP()
 public function get_visitor_OS()
 {
 
-$userAgent= sanitize_text_field($_SERVER['HTTP_USER_AGENT']);
+
+$userAgent = isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field($_SERVER['HTTP_USER_AGENT']) : '';
+
 		$oses = array (
 		'iPhone' => '(iPhone)',
 		'Windows 3.11' => 'Win16',
