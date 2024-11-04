@@ -4,7 +4,7 @@ Plugin Name: SEO Redirection
 Plugin URI: https://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin/
 Description: By this plugin you can manage all your website redirection types easily.
 Author: wp-buy
-Version: 9.10
+Version: 9.11
 Author URI: https://www.wp-buy.com
 Text Domain: seo-redirection
 */
@@ -43,119 +43,121 @@ register_uninstall_hook(__FILE__, 'WPSR_uninstall');
 
 /////////////////////////////////////////////////////////////////////////
 
-if(!function_exists("WPSR__filter_action_links")){
-function WPSR__filter_action_links( $links ) { 
-	$links['settings'] = sprintf('<a href="%s">Settings</a>', admin_url( 'options-general.php?page=seo-redirection.php' )); 
-	$network_dir_append = "";
-	If (is_multisite()) $network_dir_append = "network/";
-	$links['MorePlugins'] = sprintf('<a href="%s"><b style="color:#f18500">More Plugins</b></a>', admin_url( $network_dir_append . 'plugin-install.php?s=wp-buy&tab=search&type=author' )); 
-	return $links;
-}
-add_filter( 'plugin_action_links_'.plugin_basename(__FILE__), 'WPSR__filter_action_links', 10, 1 );
+if (!function_exists("WPSR__filter_action_links")) {
+    function WPSR__filter_action_links($links)
+    {
+        $links['settings'] = sprintf('<a href="%s">Settings</a>', admin_url('options-general.php?page=seo-redirection.php'));
+        $network_dir_append = "";
+        if (is_multisite()) $network_dir_append = "network/";
+        $links['MorePlugins'] = sprintf('<a href="%s"><b style="color:#f18500">More Plugins</b></a>', admin_url($network_dir_append . 'plugin-install.php?s=wp-buy&tab=search&type=author'));
+        return $links;
+    }
+    add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'WPSR__filter_action_links', 10, 1);
 }
 
 /////////////////////////////////////////////////////////////////////////
 if (!function_exists("WPSR_add_link_to_admin_bar")) {
-    function WPSR_add_link_to_admin_bar($wp_admin_bar) {
-		
-		if (current_user_can('manage_options')) {
-   
-        global $wpdb;
+    function WPSR_add_link_to_admin_bar($wp_admin_bar)
+    {
 
-        if (!is_admin_bar_showing()) {
-            return;
-        }
+        if (current_user_can('manage_options')) {
 
-        $table_name = $wpdb->prefix . 'WP_SEO_Redirection';
+            global $wpdb;
 
-        $current_url = (is_ssl() ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-        $relative_url = str_replace(home_url(), '', $current_url);
+            if (!is_admin_bar_showing()) {
+                return;
+            }
 
-        $wp_admin_bar->add_node(array(
-            'id'    => 'seo_redirection',
-            'title' => '<img src="' . plugins_url( 'icon.png', __FILE__ ) . '" style="width: 20px; height: 20px; vertical-align: middle;" alt="Icon" /> SEO Redirection',
-            'href'  => '#', 
-            'meta'  => array(
-                'class' => 'seo-redirection-admin-bar',  // Add a custom CSS class
-            ),
-        ));
-        
+            $table_name = $wpdb->prefix . 'WP_SEO_Redirection';
 
-        // Check if we are on an admin page or not
-        if (is_admin()) {
-            // Fetch the total number of 404 errors
-            $total_404_errors = WPSR_Get_total_404();
-             // Format the number with commas for readability
-             $formatted_404_errors = number_format($total_404_errors);
-
-            // Admin pages sub-nodes
-            $wp_admin_bar->add_node(array(
-                'id'     => 'manage_redirects',
-                'title'  => 'Manage Redirects',
-                'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=cutom'), 
-                'parent' => 'seo_redirection', 
-            ));
+            $current_url = (is_ssl() ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+            $relative_url = str_replace(home_url(), '', $current_url);
 
             $wp_admin_bar->add_node(array(
-                'id'     => 'post_redirects',
-                'title'  => 'Post Redirects',
-                'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=posts'), 
-                'parent' => 'seo_redirection', 
-            ));
-
-            $wp_admin_bar->add_node(array(
-                'id'     => 'history_redirects',
-                'title'  => 'History',
-                'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=history'), 
-                'parent' => 'seo_redirection', 
-            ));
-
-            // Add the 404 errors node with a dynamic total and red background
-            $wp_admin_bar->add_node(array(
-                'id'     => 'manage_404_errors',
-                'title'  => '404 Errors (' . $formatted_404_errors . ')',  // Display number of 404 errors with formatting
-                'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=404'), 
-                'parent' => 'seo_redirection', 
-                'meta'   => array(
-                    'class' => 'wpsr-404-errors-admin-bar',  // Custom class for styling
+                'id'    => 'seo_redirection',
+                'title' => '<img src="' . plugins_url('icon.png', __FILE__) . '" style="width: 20px; height: 20px; vertical-align: middle;" alt="Icon" /> SEO Redirection',
+                'href'  => '#',
+                'meta'  => array(
+                    'class' => 'seo-redirection-admin-bar',  // Add a custom CSS class
                 ),
             ));
 
-        } else {
-            // Front-end sub-nodes (same as your original function)
-            $result = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE redirect_from = %s", $relative_url));
 
-            if (!empty($result)) {
+            // Check if we are on an admin page or not
+            if (is_admin()) {
+                // Fetch the total number of 404 errors
+                $total_404_errors = WPSR_Get_total_404();
+                // Format the number with commas for readability
+                $formatted_404_errors = number_format($total_404_errors);
+
+                // Admin pages sub-nodes
                 $wp_admin_bar->add_node(array(
-                    'id'     => 'edit_redirection',
-                    'title'  => 'Edit Redirection',
-                    'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=cutom&redirect_from=' . $relative_url ), 
-                    'parent' => 'seo_redirection', 
+                    'id'     => 'manage_redirects',
+                    'title'  => 'Manage Redirects',
+                    'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=cutom'),
+                    'parent' => 'seo_redirection',
                 ));
 
                 $wp_admin_bar->add_node(array(
-                    'id'     => 'view_history',
-                    'title'  => 'View History',
-                    'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=history'), 
-                    'parent' => 'seo_redirection', 
+                    'id'     => 'post_redirects',
+                    'title'  => 'Post Redirects',
+                    'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=posts'),
+                    'parent' => 'seo_redirection',
+                ));
+
+                $wp_admin_bar->add_node(array(
+                    'id'     => 'history_redirects',
+                    'title'  => 'History',
+                    'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=history'),
+                    'parent' => 'seo_redirection',
+                ));
+
+                // Add the 404 errors node with a dynamic total and red background
+                $wp_admin_bar->add_node(array(
+                    'id'     => 'manage_404_errors',
+                    'title'  => '404 Errors (' . $formatted_404_errors . ')',  // Display number of 404 errors with formatting
+                    'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=404'),
+                    'parent' => 'seo_redirection',
+                    'meta'   => array(
+                        'class' => 'wpsr-404-errors-admin-bar',  // Custom class for styling
+                    ),
                 ));
             } else {
-                $wp_admin_bar->add_node(array(
-                    'id'     => 'add_redirection',
-                    'title'  => 'Redirect this page',
-                    'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=cutom&redirect_from=' . $relative_url), 
-                    'parent' => 'seo_redirection', 
-                ));
+                // Front-end sub-nodes (same as your original function)
+                $result = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE redirect_from = %s", $relative_url));
+
+                if (!empty($result)) {
+                    $wp_admin_bar->add_node(array(
+                        'id'     => 'edit_redirection',
+                        'title'  => 'Edit Redirection',
+                        'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=cutom&redirect_from=' . $relative_url),
+                        'parent' => 'seo_redirection',
+                    ));
+
+                    $wp_admin_bar->add_node(array(
+                        'id'     => 'view_history',
+                        'title'  => 'View History',
+                        'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=history'),
+                        'parent' => 'seo_redirection',
+                    ));
+                } else {
+                    $wp_admin_bar->add_node(array(
+                        'id'     => 'add_redirection',
+                        'title'  => 'Redirect this page',
+                        'href'   => admin_url('options-general.php?page=seo-redirection.php&tab=cutom&redirect_from=' . $relative_url),
+                        'parent' => 'seo_redirection',
+                    ));
+                }
             }
         }
     }
-	}
 
     add_action('admin_bar_menu', 'WPSR_add_link_to_admin_bar', 999);
 }
 /////////////////////////////////////////////////////////////////////////
 
-function custom_admin_bar_styles() {
+function custom_admin_bar_styles()
+{
     if (is_admin_bar_showing()) {
         echo '<style>
             #wp-admin-bar-seo_redirection > .ab-item {
@@ -215,20 +217,21 @@ add_action('admin_head', 'custom_admin_bar_styles');
 
 
 /////////////////////////////////////////////////////////////////////////
-if(!function_exists('wpsr_dashboard_notice')) {
+if (!function_exists('wpsr_dashboard_notice')) {
 
-    function wpsr_dashboard_notice() {
+    function wpsr_dashboard_notice()
+    {
         // Get the total number of 404 errors
         $total_404_errors = WPSR_Get_total_404();
-    
+
         // Only show the notice if there are more than 100 broken links and if the user has not dismissed it
         if ($total_404_errors > 100 && !get_user_meta(get_current_user_id(), 'wpsr_404_notice_dismissed')) {
             // Image URL for the icon (Replace with your own uploaded image or the default WordPress icon)
-            $icon_url =plugins_url( 'icon.png', __FILE__ );
-    
+            $icon_url = plugins_url('icon.png', __FILE__);
+
             // Message content with buttons
             $message = __('<strong>SEO Redirection</strong>: You have', 'seo-redirection') . ' <b style="color:red;     padding:3px;">' . intval($total_404_errors) . '</b>' . __(' broken links (404). Manage them now to fix the issue and improve your site\'s SEO performance.', 'seo-redirection');
-    
+
             // Display the message with inline styles
             echo '
             <div class="notice notice-error is-dismissible wpsr-404-notice" style="border-left: 4px solid red;  display: flex; align-items: center;">
@@ -244,7 +247,7 @@ if(!function_exists('wpsr_dashboard_notice')) {
                 </div>
             </div>
             ';
-    
+
             // Add the script for handling the dismiss action
             echo '
             <script type="text/javascript">
@@ -263,21 +266,21 @@ if(!function_exists('wpsr_dashboard_notice')) {
         }
     }
     add_action('admin_notices', 'wpsr_dashboard_notice');
-    
 }
 
 
-if(!function_exists('wpsr_dismiss_404_notice')) {
+if (!function_exists('wpsr_dismiss_404_notice')) {
 
-    function wpsr_dismiss_404_notice() {
+    function wpsr_dismiss_404_notice()
+    {
         // Update the user meta to mark the notice as dismissed
         update_user_meta(get_current_user_id(), 'wpsr_404_notice_dismissed', true);
         wp_die(); // This is required to terminate immediately and return a proper response
     }
-add_action('wp_ajax_wpsr_dismiss_404_notice', 'wpsr_dismiss_404_notice');
+    add_action('wp_ajax_wpsr_dismiss_404_notice', 'wpsr_dismiss_404_notice');
 }
- //////////////////////////////////////////////////////////////////////////////////////////////////   
-if(!function_exists("WPSR_multiple_plugin_activate_trial")){
+//////////////////////////////////////////////////////////////////////////////////////////////////   
+if (!function_exists("WPSR_multiple_plugin_activate_trial")) {
     function WPSR_multiple_plugin_activate_trial()
     {
         global $wpdb;
@@ -292,10 +295,9 @@ if(!function_exists("WPSR_multiple_plugin_activate_trial")){
     }
 
     register_activation_hook(__FILE__, 'WPSR_multiple_plugin_activate_trial');
-
 }
 
-if(!function_exists("WPSR_adding_custom_meta_boxes")) {
+if (!function_exists("WPSR_adding_custom_meta_boxes")) {
 
     function WPSR_adding_custom_meta_boxes()
     {
@@ -313,11 +315,10 @@ if(!function_exists("WPSR_adding_custom_meta_boxes")) {
                     $screen
                 );
             }
-
         }
     }
 }
-if(!function_exists("WPSR_render_meta_box")) {
+if (!function_exists("WPSR_render_meta_box")) {
 
     function WPSR_render_meta_box($post)
     {
@@ -329,7 +330,6 @@ if(!function_exists("WPSR_render_meta_box")) {
             if (in_array($post->post_status, array('draft', 'pending'))) {
                 list($permalink, $postname) = get_sample_permalink($post->ID);
                 $permalink = str_replace('%postname%', $postname, $permalink);
-
             } else {
 
                 $permalink = get_permalink($post->ID);
@@ -417,8 +417,6 @@ function redirect_check_click()
                 echo "<script type='text/javascript'>WSR_check_status(0);</script>";
             else
                 echo "<script type='text/javascript'>WSR_check_status(1);</script>";
-
-
         } else {
             echo __('You can not make a redirection for the new posts before saving them.', 'seo-redirection');
         }
@@ -429,7 +427,7 @@ function redirect_check_click()
 
 //---------------------------------------------------------------
 // added 2/2/2020
-if(!function_exists("WPSR_get_site_404_page_path")) {
+if (!function_exists("WPSR_get_site_404_page_path")) {
 
     function WPSR_get_site_404_page_path()
     {
@@ -443,35 +441,31 @@ if(!function_exists("WPSR_get_site_404_page_path")) {
 
         return $site_404_page;
     }
-
 }
 //---------------------------------------------------------------
 // updated 2/2/2020
 
 function WPSR_check_default_permalink()
- {           
-    $file= get_home_path() . "/.htaccess";
-    $content="ErrorDocument 404 " . WPSR_get_site_404_page_path();
+{
+    $file = get_home_path() . "/.htaccess";
+    $content = "ErrorDocument 404 " . WPSR_get_site_404_page_path();
 
-    $marker_name="FRedirect_ErrorDocument";
-    $filestr ="";
+    $marker_name = "FRedirect_ErrorDocument";
+    $filestr = "";
 
- 
- if(is_readable($file))
-                {
-                       $f = @fopen( $file, 'r+' );
-                       if ($f !== false) {
-								$filestr = @fread($f , filesize($file));
-								if (strpos($filestr , $marker_name) === false)
-								{
-										insert_with_markers( $file,  $marker_name,  $content );
-								}
-						}
-                }else{
-                        echo $file.' is not readable!';
-                }
 
- }
+    if (is_readable($file)) {
+        $f = @fopen($file, 'r+');
+        if ($f !== false) {
+            $filestr = @fread($f, filesize($file));
+            if (strpos($filestr, $marker_name) === false) {
+                insert_with_markers($file,  $marker_name,  $content);
+            }
+        }
+    } else {
+        echo $file . ' is not readable!';
+    }
+}
 
 //------------------------------------------------------------------------
 
@@ -483,7 +477,7 @@ function WPSR_check_default_permalink()
  * @since  0.1
  * @return mixed
  */
-if(!function_exists("WPSR_sanitize_text_or_array_field")) {
+if (!function_exists("WPSR_sanitize_text_or_array_field")) {
 
     function WPSR_sanitize_text_or_array_field($array_or_string)
     {
@@ -502,7 +496,7 @@ if(!function_exists("WPSR_sanitize_text_or_array_field")) {
         return $array_or_string;
     }
 }
-if(!function_exists("WPSR_get_post_redirection")) {
+if (!function_exists("WPSR_get_post_redirection")) {
 
     function WPSR_get_post_redirection($post_id)
     {
@@ -510,13 +504,13 @@ if(!function_exists("WPSR_get_post_redirection")) {
         global $wpdb, $util, $table_prefix;
         $table_name = $table_prefix . 'WP_SEO_Redirection';
 
-// Autosave
+        // Autosave
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
             return;
-// AJAX
+        // AJAX
         if (defined('DOING_AJAX') && DOING_AJAX)
             return;
-// Post revision
+        // Post revision
         if (false !== wp_is_post_revision($post_id))
             return;
 
@@ -532,14 +526,11 @@ if(!function_exists("WPSR_get_post_redirection")) {
 
                 $sql = $wpdb->prepare("update $table_name set redirect_to=%s,redirect_from=%s,redirect_type='301',url_type=2 where postID=%d", $redirect_to, $redirect_from, $post_id);
                 $wpdb->query($sql);
-
             } else {
                 $wpdb->query($wpdb->prepare("delete from $table_name where redirect_from=%s", $redirect_from));
                 $sql = $wpdb->prepare("insert into $table_name(redirect_from,redirect_to,redirect_type,url_type,postID) values (%s,%s,'301',2,%d) ", $redirect_from, $redirect_to, $post_id);
                 $wpdb->query($sql);
             }
-
-
         } else {
             $wpdb->query($wpdb->prepare("delete from $table_name where postID=%d", $post_id));
         }
@@ -547,10 +538,9 @@ if(!function_exists("WPSR_get_post_redirection")) {
         $SR_redirect_cache = new free_SR_redirect_cache();
         $SR_redirect_cache->free_cache();
     }
-
 }
 //-------------------------------------------------------------
-if(!function_exists("WPSR_log_404_redirection")) {
+if (!function_exists("WPSR_log_404_redirection")) {
 
     function WPSR_log_404_redirection($link)
     {
@@ -559,7 +549,7 @@ if(!function_exists("WPSR_log_404_redirection")) {
 
         $referrer = $util->get_ref();
         $ip = $util->get_visitor_IP();
-        $country = "";//$util->get_visitor_country();
+        $country = ""; //$util->get_visitor_country();
         $os = $util->get_visitor_OS();
         $browser = $util->get_visitor_Browser();
 
@@ -567,10 +557,9 @@ if(!function_exists("WPSR_log_404_redirection")) {
             $wpdb->query($wpdb->prepare(" insert IGNORE into $table_name(ctime,link,referrer,ip,country,os,browser) values(NOW(),%s,%s,%s,%s,%s,%s) ", $link, $referrer, $ip, $country, $os, $browser));
         }
     }
-
 }
 //-------------------------------------------------------------
-if(!function_exists("WPSR_log_redirection_history")) {
+if (!function_exists("WPSR_log_redirection_history")) {
 
     function WPSR_log_redirection_history($rID, $postID, $rfrom, $rto, $rtype, $rsrc)
     {
@@ -581,7 +570,7 @@ if(!function_exists("WPSR_log_redirection_history")) {
         $rfrom = esc_url($rfrom);
         $referrer = $util->get_ref();
         $ip = $util->get_visitor_IP();
-        $country = "";//$util->get_visitor_country();
+        $country = ""; //$util->get_visitor_country();
         $os = $util->get_visitor_OS();
         $browser = $util->get_visitor_Browser();
 
@@ -591,18 +580,16 @@ if(!function_exists("WPSR_log_redirection_history")) {
 
         $expdate = date('Y-n-j', time() - (intval($limit) * 24 * 60 * 60));
         $wpdb->query("delete FROM $table_name WHERE date_format(date(ctime),'%Y-%m-%d') < date_format(date('$expdate'),'%Y-%m-%d')");
-
-
     }
 }
 //-------------------------------------------------------------
-if(!function_exists("WPSR_make_redirect")) {
+if (!function_exists("WPSR_make_redirect")) {
 
     function WPSR_make_redirect($redirect_to, $redirect_type, $redirect_from, $obj = '')
     {
-		
+
         global $wpdb, $util, $table_prefix, $post;
-		
+
         if (is_admin()) {
             return 0;
         }
@@ -645,12 +632,10 @@ if(!function_exists("WPSR_make_redirect")) {
                         $redirect_to = $redirect_to . $difference;
                     }
                 }
-
             } else if ($obj->redirect_from_type == 'Regex') {
                 $page = substr(strrchr($redirect_from, "/"), 1);
                 $redirect_to = $redirect_to . '/' . $page;
             }
-
         }
 
         $rID = 0;
@@ -664,7 +649,6 @@ if(!function_exists("WPSR_make_redirect")) {
                 $rsrc = 'Custom';
             else if ($obj->url_type == 2)
                 $rsrc = 'Post';
-
         }
 
         if ($util->get_option_value('history_status') == '1') {
@@ -694,19 +678,17 @@ if(!function_exists("WPSR_make_redirect")) {
             header("Location: " . $redirect_to);
             exit();
         }
-
     }
 }
-add_filter('pre_get_table_charset', function($charset, $table) {
+add_filter('pre_get_table_charset', function ($charset, $table) {
     global $table_prefix;
     $table_name = $table_prefix . 'WP_SEO_Redirection';
-    if($table == $table_name){
+    if ($table == $table_name) {
         return 'utf8mb4';
     }
-
 }, 10, 2);
 //-------------------------------------------------------------
-if(!function_exists("WPSR_redirect")) {
+if (!function_exists("WPSR_redirect")) {
 
     function WPSR_redirect()
     {
@@ -714,7 +696,7 @@ if(!function_exists("WPSR_redirect")) {
 
 
         if ($util->get_option_value('plugin_status') != '0') { // if not disabled
-			
+
             // if disable for admin and the user is admin
             if (current_user_can('manage_options') == 1 && $util->get_option_value('plugin_status') == 2) {
                 // nothing
@@ -742,8 +724,8 @@ if(!function_exists("WPSR_redirect")) {
                 }
 
                 if ($post_cache_result == 'not_redirected') {
-					
-                   return 0;
+
+                    return 0;
                 }
 
                 $permalink_options = $wpdb->prepare("( redirect_from = %s OR redirect_from = %s)", $permalink, $permalink_alternative);
@@ -775,7 +757,6 @@ if(!function_exists("WPSR_redirect")) {
                         if ($options['p404_status'] == '1') {
 
                             WPSR_make_redirect($options['p404_redirect_to'], '301', $permalink);
-
                         }
                     }
                 }
@@ -783,26 +764,28 @@ if(!function_exists("WPSR_redirect")) {
                 if (is_singular() && $post_cache_result == 'not_found') {
                     $SR_redirect_cache->add_redirect($post->ID, 0, '', '', 0);
                 }
-
             }
         }
     }
 }
 //---------------------------------------------------------------
-if(!function_exists("WPSR_header_code")) {
+if (!function_exists("WPSR_header_code")) {
 
     function WPSR_header_code()
     {
-       
+
         $my_page = isset($_REQUEST['page']) ? $_REQUEST['page'] : '';
         if ($my_page == 'seo-redirection.php') {
 
-            wp_register_style('c_admin_css_common', plugins_url() . '/' . basename(dirname(__FILE__)) . '/common/' . "style.css");            
+            wp_register_style('c_admin_css_common', plugins_url() . '/' . basename(dirname(__FILE__)) . '/common/' . "style.css");
             wp_enqueue_style('sweetalert', plugins_url() . '/' . basename(dirname(__FILE__)) . '/common/' . "sweetalert.css");
             wp_register_style('c_admin_css_custom', plugins_url() . '/' . basename(dirname(__FILE__)) . '/custom/' . "style.css");
             wp_enqueue_script('jquery');
             wp_localize_script('jquery', 'seoredirection', array('ajax_url' => admin_url('admin-ajax.php'), 'msg' => ""));
-            wp_enqueue_style('c_admin_css_common');						$rand = rand( 1, 99999999999 );					wp_register_style('c_css_common', plugins_url() . '/' . basename(dirname(__FILE__)) . '/common/' . "custom.css", '', $rand);			wp_enqueue_style('c_css_common');
+            wp_enqueue_style('c_admin_css_common');
+            $rand = rand(1, 99999999999);
+            wp_register_style('c_css_common', plugins_url() . '/' . basename(dirname(__FILE__)) . '/common/' . "custom.css", '', $rand);
+            wp_enqueue_style('c_css_common');
             wp_enqueue_style('c_admin_css_custom');
 
             wp_enqueue_script('custom', plugins_url() . '/' . basename(dirname(__FILE__)) . '/common/js/' . 'bootstrap.min.js', array('jquery'), false, true);
@@ -810,13 +793,11 @@ if(!function_exists("WPSR_header_code")) {
             wp_enqueue_script('sweetalert', plugins_url() . '/' . basename(dirname(__FILE__)) . '/common/js/' . "sweetalert.min.js", array('jquery'), false, true);
 
             wp_enqueue_style('bootstrap', plugins_url() . '/' . basename(dirname(__FILE__)) . '/common/' . "bootstrap.css");
-
-
         }
     }
 }
 //---------------------------------------------------------------
-if(!function_exists("WPSR_customAddUpdate_callback")) {
+if (!function_exists("WPSR_customAddUpdate_callback")) {
 
     add_action("wp_ajax_customAddUpdate", "WPSR_customAddUpdate_callback");
 
@@ -841,7 +822,7 @@ if(!function_exists("WPSR_customAddUpdate_callback")) {
 
         $redirect_from = isset($_POST['redirect_from']) ? WPSR_sanitize_text_or_array_field($_POST['redirect_from']) : '';
 
-       /* $wpdb->get_results(" select ID from $table_name where redirect_from='" . trim($redirect_from) . "' ");
+        /* $wpdb->get_results(" select ID from $table_name where redirect_from='" . trim($redirect_from) . "' ");
         if ($wpdb->num_rows > 0) {
             $data['inputerror'][] = 'redirect_from';
             $data['error_string'][] = __("This 'Redirect From' value already exists in database!", "seo-redirection");
@@ -849,11 +830,11 @@ if(!function_exists("WPSR_customAddUpdate_callback")) {
         }
 
 */
-    //  elseif (!preg_match( '/((http|https)\:\/\/)?[a-zA-Z0-9\.\/\?\:@\-_=#]+\.([a-zA-Z0-9\&\.\/\?\:@\-_=#])*/', $_POST['redirect_from'])) {
-    //            $data['inputerror'][] = 'redirect_from';
-    //            $data['error_string'][] = __("Invalid redirect from target URL!",'seo-redirection');
-    //            $data['bool'] = FALSE;
-    //  }
+        //  elseif (!preg_match( '/((http|https)\:\/\/)?[a-zA-Z0-9\.\/\?\:@\-_=#]+\.([a-zA-Z0-9\&\.\/\?\:@\-_=#])*/', $_POST['redirect_from'])) {
+        //            $data['inputerror'][] = 'redirect_from';
+        //            $data['error_string'][] = __("Invalid redirect from target URL!",'seo-redirection');
+        //            $data['bool'] = FALSE;
+        //  }
         if (trim($_POST['redirect_to']) == '') {
             $data['inputerror'][] = 'redirect_to';
             $data['error_string'][] = __("You must input the 'Redirect To' URL", "seo-redirection");
@@ -908,7 +889,6 @@ if(!function_exists("WPSR_customAddUpdate_callback")) {
                             $regex = '^' . $util->regex_prepare($redirect_from) . '[^/]+$';
                         }
                     }
-
                 } else if ($redirect_from_type == 'Regex') {
                     $regex = $redirect_from;
                 }
@@ -933,9 +913,9 @@ if(!function_exists("WPSR_customAddUpdate_callback")) {
                     $theurl = $wpdb->get_row($wpdb->prepare(" select count(ID) as cnt from $table_name where redirect_from=%s ", $redirect_from));
 
                     if ($theurl->cnt > 0) {
-                        $msg = __("This URL", 'seo-redirection') . " <b>".esc_html($redirect_from)."</b>" . __("is added previously!", 'seo-redirection');
+                        $msg = __("This URL", 'seo-redirection') . " <b>" . esc_html($redirect_from) . "</b>" . __("is added previously!", 'seo-redirection');
                         echo json_encode(array('status' => 'error', 'msg' => $msg));
-//		$util->failure_option_msg(__("This URL",'seo-redirection')." <b>'$redirect_from'</b>". __("is added previously!",'seo-redirection'));
+                        //		$util->failure_option_msg(__("This URL",'seo-redirection')." <b>'$redirect_from'</b>". __("is added previously!",'seo-redirection'));
                     } else {
 
 
@@ -965,7 +945,6 @@ if(!function_exists("WPSR_customAddUpdate_callback")) {
                             echo json_encode(array('status' => 'success', 'msg' => $msg, 'url' => admin_url('options-general.php?page=seo-redirection.php')));
                             die;
                         }
-
                     }
                 } else if ($_POST['edit_exist'] != '') {
 
@@ -983,21 +962,18 @@ if(!function_exists("WPSR_customAddUpdate_callback")) {
                     $msg = "Redirection Update Successfully";
                     echo json_encode(array('status' => 'success', 'msg' => $msg, 'url' => admin_url('options-general.php?page=seo-redirection.php')));
                     die;
-
                 }
 
                 if ($util->there_is_cache() != '')
                     $util->info_option_msg(__("You have a cache plugin installed", 'seo-redirection') . " <b>'" . $util->there_is_cache() . "'</b>, " . __("you have to clear cache after any changes to get the changes reflected immediately! ", 'seo-redirection'));
-
             }
-
         }
 
 
         die;
     }
 }
-if(!function_exists("WPSR_customUpdateRec_callback")) {
+if (!function_exists("WPSR_customUpdateRec_callback")) {
 
     add_action("wp_ajax_customUpdateRec", "WPSR_customUpdateRec_callback");
     function WPSR_customUpdateRec_callback()
@@ -1037,7 +1013,7 @@ if(!function_exists("WPSR_customUpdateRec_callback")) {
     }
 }
 
-if(!function_exists("WPSR_admin_menu")) {
+if (!function_exists("WPSR_admin_menu")) {
 
     function WPSR_admin_menu()
     {
@@ -1045,9 +1021,10 @@ if(!function_exists("WPSR_admin_menu")) {
     }
 }
 //---------------------------------------------------------------
-if(!function_exists("WPSR_options_menu")) {
+if (!function_exists("WPSR_options_menu")) {
 
-    function WPSR_options_menu(){
+    function WPSR_options_menu()
+    {
         global $util;
 
         if (!current_user_can('manage_options')) {
@@ -1060,32 +1037,29 @@ if(!function_exists("WPSR_options_menu")) {
         } else if ($util->get_option_value('plugin_status') == '2') {
             $util->info_option_msg(__('SEO Redirection is', 'seo-redirection') . ' <b>' . __('disabled for admin', 'seo-redirection') . '</b>' . __(' only, you can go to option tab and enable it!', 'seo-redirection'));
         }
-        $total_404_errors = (WPSR_Get_total_404() > -1) ? __('You have', 'seo-redirection') . ' <b  style="color:red; background-color:yellow; padding:3px;">' . intval(WPSR_Get_total_404()) .'</b>' . __(' broken link (404 links)', 'seo-redirection') . ', <br>' : '';
+        $total_404_errors = (WPSR_Get_total_404() > 10) ? __('You have', 'seo-redirection') . ' <b  style="color:red; background-color:yellow; padding:3px;">' . intval(WPSR_Get_total_404()) . '</b>' . __(' broken link (404 links)', 'seo-redirection') . ', <br>' : '';
 
 
         echo '<div class="wrap"><h2>' . __("SEO Redirection Free", 'seo-redirection') . '</h2><b>' . __('Upgrade to', 'seo-redirection') . ' <a target="_blank" onclick="swal.clickConfirm();" href="https://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin/">' . __("Pro Version", "seo-redirection") . '</a>' . __(" to manage 404 errors and empower your site SEO", "seo-redirection") . '&nbsp;&nbsp;&nbsp;<strong style="color:yellow; background-color:red; padding:3px;"> ' . __("NOW 50% OFF ", 'seo-redirection') . '</strong></b><br/><br/>';
 
-		if ($total_404_errors != '') {
-        ?>
-        <script type="text/javascript">
+        if ($total_404_errors != '') {
+?>
+            <script type="text/javascript">
+                seoredirection.msg = '<?php echo wp_kses_post($total_404_errors); ?>';
+            </script>
 
-            seoredirection.msg = '<?php echo wp_kses_post($total_404_errors); ?>';
+            <?php
+        }
 
-        </script>
-
-        <?php
-    }
-	
         if (is_multisite()) {
 
             echo '<div class="error" id="message"><p></p><div class="warning_icon"></div>' . __('This version does not support Multisite WordPress installation, you may face troubles like losing redirects when adding new sites to your network, the premium version supports multisite well', 'seo-redirection') . '(<a target="_blank" href="https://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin/">
 https://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin/</a>) <p></p></div>';
-
         }
 
         $mytabs = new phptab();
 
-        $mytabs->set_ignore_parameter(array( 'search', 'page_num', 'add', 'edit', 'page404', 'do_404_del'));
+        $mytabs->set_ignore_parameter(array('search', 'page_num', 'add', 'edit', 'page404', 'do_404_del'));
         $mytabs->add_file_tab('cutom', __('Custom Redirects', 'seo-redirection'), 'option_page_custome_redirection.php', 'file');
         $mytabs->add_file_tab('posts', __('Post Redirects', 'seo-redirection'), 'option_page_post_redirection_list.php', 'file');
         $mytabs->add_file_tab('history', __('History', 'seo-redirection'), 'option_page_history.php', 'file');
@@ -1095,30 +1069,27 @@ https://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin/</a>) <p
         $mytabs->add_file_tab('premium', '<span style="color:brown;"><b>&#9658; ' . __('Premium Features', 'seo-redirection') . '</b></span>', 'premium.php', 'file');
         $mytabs->run();
 
-     $imgpath = $util->get_plugin_url() . 'custom/images/';
+        $imgpath = $util->get_plugin_url() . 'custom/images/';
 
-    echo '<p>&nbsp;</p><p style="color:green"><a target="_blank" href="http://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin"><b>' . __("Upgrade to premium version now", "wsr") . '</b></a>' . __(" to get more features", "wsr") . ' , <small>' . __("The premium version of SEO redirection is completely different from the free version as there are a lot more features included.", "wsr") . '</small></p>';
-    echo __('<p><a href="https://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin" target="_blank"><img src="' . $imgpath . 'seopro.png" /></a></p>');
+        echo '<p>&nbsp;</p><p style="color:green"><a target="_blank" href="http://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin"><b>' . __("Upgrade to premium version now", "wsr") . '</b></a>' . __(" to get more features", "wsr") . ' , <small>' . __("The premium version of SEO redirection is completely different from the free version as there are a lot more features included.", "wsr") . '</small></p>';
+        echo __('<p><a href="https://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin" target="_blank"><img src="' . $imgpath . 'seopro.png" /></a></p>');
+    }
 }
-}
-if(!function_exists("WPSR_upgrade")) {
+if (!function_exists("WPSR_upgrade")) {
 
     function WPSR_upgrade()
     {
-
+        //Edited by Ibrahim Shatat 4/11/2024
+        //Make the upgrade statment to reach the latest version always & remove if clause
         $util = new clogica_util_1();
-        $util->init(WP_SEO_REDIRECTION_OPTIONS, __FILE__);
-
-        if ($util->get_option_value('plugin_version') != WP_SEO_REDIRECTION_VERSION) {
-            WPSR_install();
-            $util->update_option('plugin_version', WP_SEO_REDIRECTION_VERSION);
-        }
+        WPSR_install();
+        $util->update_option('plugin_version', WP_SEO_REDIRECTION_VERSION);
     }
 }
 
 //-----------------------------------------------------
 
-if(!function_exists("WPSR_install")) {
+if (!function_exists("WPSR_install")) {
 
     function WPSR_install()
     {
@@ -1196,8 +1167,6 @@ if(!function_exists("WPSR_install")) {
                   UNIQUE KEY `redirect_from` (`redirect_from`)
                 )ENGINE = MyISAM ;";
             $wpdb->query($sql);
-
-
         } else {
             //check if Innodb convert it to myisam.
             $status = $wpdb->get_row("SHOW TABLE STATUS WHERE Name = '$table_name'");
@@ -1237,8 +1206,6 @@ if(!function_exists("WPSR_install")) {
 
                 $wpdb->query($sql);
             }
-
-
         }
 
         $table_name = $table_prefix . 'WP_SEO_Cache';
@@ -1276,7 +1243,6 @@ if(!function_exists("WPSR_install")) {
             $wpdb->query($sql);
         }
 
-
         $table_name = $table_prefix . 'WP_SEO_404_links';
         if (strtolower($wpdb->get_var("show tables like '$table_name'")) != strtolower($table_name)) {
             $sql = "CREATE TABLE IF NOT EXISTS `$table_name` (
@@ -1302,57 +1268,50 @@ if(!function_exists("WPSR_install")) {
         }
 
 
-        $table_name = $table_prefix . 'WP_SEO_Redirection_LOG';
-        if (strtolower($wpdb->get_var("show tables like '$table_name'")) != strtolower($table_name)) {
+        $table_name = $wpdb->prefix . 'WP_SEO_Redirection_LOG';
+
+        if (strtolower($wpdb->get_var("SHOW TABLES LIKE '$table_name'")) != strtolower($table_name)) {
             $sql = "CREATE TABLE IF NOT EXISTS `$table_name` (
-              `ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
-              `rID` int(11) unsigned DEFAULT NULL,
-              `postID` int(11) unsigned DEFAULT NULL,
-              `ctime` datetime NOT NULL,
-              `rfrom` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-              `rto` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-              `rtype` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-              `rsrc` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
-              `referrer` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-              `ip` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
-              `country` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
-              `os` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
-              `browser` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
-              PRIMARY KEY (`ID`)
-            ) ENGINE = MyISAM ;
-			";
+                `ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
+                `rID` int(11) unsigned DEFAULT NULL,
+                `postID` int(11) unsigned DEFAULT NULL,
+                `ctime` datetime NOT NULL,
+                `rfrom` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+                `rto` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+                `rtype` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+                `rsrc` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
+                `referrer` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+                `ip` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
+                `country` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
+                `os` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
+                `browser` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
+                PRIMARY KEY (`ID`)
+            ) ENGINE = MyISAM;";
 
             $wpdb->query($sql);
         } else {
-            //check if Innodb convert it to myisam.
+            // Check if InnoDB and convert to MyISAM if necessary
             $status = $wpdb->get_row("SHOW TABLE STATUS WHERE Name = '$table_name'");
             if ($status->Engine == 'InnoDB') {
-                $wpdb->query("alter table $table_name engine = MyISAM;");
+                $wpdb->query("ALTER TABLE $table_name ENGINE = MyISAM;");
             }
 
-            $res = $wpdb->get_var(" SELECT count(*) as cnt FROM INFORMATION_SCHEMA.COLUMNS
-                   WHERE TABLE_NAME = '$table_name'
-			AND table_schema = DATABASE()
-                        AND COLUMN_NAME = 'postID' ");
+            // Check if the postID column exists and add it if missing
+            $res = $wpdb->get_var("SELECT count(*) as cnt FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_NAME = '$table_name'
+                AND COLUMN_NAME = 'postID'
+                AND table_schema = DATABASE()");
 
             if ($res == '0') {
-
-                $sql = "
-                ALTER TABLE $table_name
-                ADD COLUMN `postID` int(11)  unsigned DEFAULT NULL;
-            ";
+                $sql = "ALTER TABLE $table_name ADD COLUMN `postID` int(11) unsigned DEFAULT NULL;";
                 $wpdb->query($sql);
             }
-
-
         }
-
     }
-
 }
 //---------------------------------------------------------------
 
-if(!function_exists("WPSR_uninstall")) {
+if (!function_exists("WPSR_uninstall")) {
 
     function WPSR_uninstall()
     {
@@ -1379,13 +1338,10 @@ if(!function_exists("WPSR_uninstall")) {
 
             $util->delete_my_options();
         }
-
-
     }
-
 }
 //---------------------------------------------------------------
-if(!function_exists("WPSR_HideMessageAjaxFunction")) {
+if (!function_exists("WPSR_HideMessageAjaxFunction")) {
 
     function WPSR_HideMessageAjaxFunction()
     {
@@ -1393,48 +1349,47 @@ if(!function_exists("WPSR_HideMessageAjaxFunction")) {
     }
 }
 //---------------------------------------------------------------
-if(!function_exists("WPSR_admin_notice_callback")) {
+if (!function_exists("WPSR_admin_notice_callback")) {
 
-/* display import from redirection plugin in admin notice */
-function WPSR_admin_notice_callback() {
-	global $wpdb;
-	global $current_user;
-	$plugins = get_option( 'active_plugins', array() );
-	$found = false;
-	$user_id = $current_user->ID;
-	$val = get_user_meta($user_id, 'sr_notice_dismissed',true);	
-        
-        foreach ( $plugins as $plugin ) 
-	{
-		if ( strpos( strval($plugin), 'redirection.php' ) == true && $val != 1 && strpos( strval($plugin), 'seo-redirection.php' ) == FALSE ) 
-		{
-			$found = true;
-			//$total = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}redirection_items");
-			$total = WPSR_getRedirectCount();
-                        if($total > 0){
-    ?>
-                                <div class="notice-success notice is-dismissible sr_notice">
-                                        <p>
-                                            <strong><?php _e('SEO Redirection : ', 'seo-redirection'); ?></strong><?php echo __( 'The plugin detected ','seo-redirection').intval($total).__(' redirects in the Redirection plugin, Import it now. ','seo-redirection'); ?>
-                                                <?php 
-												$SR_import = isset($_GET['SR_import']) ? sanitize_text_field($_GET['SR_import']) : '';
-												if($SR_import == 'yes'){?>
-												<button type='button' data-toggle="modal"  class="button" href="#" data-target="#import_modal"  value="btn_import"><span style="margin-top: 3px;" class="dashicons dashicons-migrate"></span>&nbsp; <?php  _e('Import Now','seo-redirection'); ?></button>
-												<?php }else{ ?>
-												<a href="options-general.php?page=seo-redirection.php&tab=export_import&SR_import=yes" data-target="#import_modal"  value="btn_import"><?php  _e('Import','seo-redirection'); ?></a>
-												<?php }?>
-                                        </p>
-                                </div>
-    <?php
-                        }
-			break;
-		}
-	}
-}
-add_action( 'admin_notices', 'WPSR_admin_notice_callback' );
+    /* display import from redirection plugin in admin notice */
+    function WPSR_admin_notice_callback()
+    {
+        global $wpdb;
+        global $current_user;
+        $plugins = get_option('active_plugins', array());
+        $found = false;
+        $user_id = $current_user->ID;
+        $val = get_user_meta($user_id, 'sr_notice_dismissed', true);
+
+        foreach ($plugins as $plugin) {
+            if (strpos(strval($plugin), 'redirection.php') == true && $val != 1 && strpos(strval($plugin), 'seo-redirection.php') == FALSE) {
+                $found = true;
+                //$total = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}redirection_items");
+                $total = WPSR_getRedirectCount();
+                if ($total > 0) {
+            ?>
+                    <div class="notice-success notice is-dismissible sr_notice">
+                        <p>
+                            <strong><?php _e('SEO Redirection : ', 'seo-redirection'); ?></strong><?php echo __('The plugin detected ', 'seo-redirection') . intval($total) . __(' redirects in the Redirection plugin, Import it now. ', 'seo-redirection'); ?>
+                            <?php
+                            $SR_import = isset($_GET['SR_import']) ? sanitize_text_field($_GET['SR_import']) : '';
+                            if ($SR_import == 'yes') { ?>
+                                <button type='button' data-toggle="modal" class="button" href="#" data-target="#import_modal" value="btn_import"><span style="margin-top: 3px;" class="dashicons dashicons-migrate"></span>&nbsp; <?php _e('Import Now', 'seo-redirection'); ?></button>
+                            <?php } else { ?>
+                                <a href="options-general.php?page=seo-redirection.php&tab=export_import&SR_import=yes" data-target="#import_modal" value="btn_import"><?php _e('Import', 'seo-redirection'); ?></a>
+                            <?php } ?>
+                        </p>
+                    </div>
+        <?php
+                }
+                break;
+            }
+        }
+    }
+    add_action('admin_notices', 'WPSR_admin_notice_callback');
 }
 
-if(!function_exists("WPSR_dismiss_notice_callback")) {
+if (!function_exists("WPSR_dismiss_notice_callback")) {
 
     add_action('wp_ajax_sr_dismiss_notice', 'WPSR_dismiss_notice_callback');
     function WPSR_dismiss_notice_callback()
@@ -1446,7 +1401,7 @@ if(!function_exists("WPSR_dismiss_notice_callback")) {
         exit;
     }
 }
-if(!function_exists("WPSR_getRedirectCount")) {
+if (!function_exists("WPSR_getRedirectCount")) {
 
     function WPSR_getRedirectCount()
     {
@@ -1463,12 +1418,10 @@ if(!function_exists("WPSR_getRedirectCount")) {
                     $redirect_from_slash = ltrim(stripslashes($redirect->url), '/');
                     $redirectID = $wpdb->get_var($wpdb->prepare("select ID from $table_name where redirect_from=%s or redirect_from=%s", $redirect_from, $redirect_from_slash));
                     if ($redirectID > 0) {
-
                     } else {
                         $cnt++;
                     }
                 }
-
             }
             return $cnt;
         } else {
@@ -1476,28 +1429,28 @@ if(!function_exists("WPSR_getRedirectCount")) {
         }
     }
 }
-if(!function_exists("SR_init_delete_callback")) {
+if (!function_exists("SR_init_delete_callback")) {
 
     add_action('admin_init', 'SR_init_delete_callback');
     function SR_init_delete_callback()
     {
         if (isset($_POST['redirect_id']) && count($_POST['redirect_id']) > 0) {
-			
-			$nonce = '';
-			if(isset($_REQUEST['_wpnonce']))
-			$nonce = WPSR_sanitize_text_or_array_field($_REQUEST['_wpnonce']);
-			
-			if(wp_verify_nonce( $nonce, 'seoredirection' )){
-				
-				global $wpdb, $table_prefix, $util;
-				$table_name = $wpdb->prefix . 'WP_SEO_Redirection';
-				foreach ($_POST['redirect_id'] as $post_id) {
-					$post_id = (int)$post_id;
-					$wpdb->query($wpdb->prepare(" delete from $table_name where ID=%s ", $post_id));
-					$SR_redirect_cache = new free_SR_redirect_cache();
-					$SR_redirect_cache->free_cache();
-				}
-			}
+
+            $nonce = '';
+            if (isset($_REQUEST['_wpnonce']))
+                $nonce = WPSR_sanitize_text_or_array_field($_REQUEST['_wpnonce']);
+
+            if (wp_verify_nonce($nonce, 'seoredirection')) {
+
+                global $wpdb, $table_prefix, $util;
+                $table_name = $wpdb->prefix . 'WP_SEO_Redirection';
+                foreach ($_POST['redirect_id'] as $post_id) {
+                    $post_id = (int)$post_id;
+                    $wpdb->query($wpdb->prepare(" delete from $table_name where ID=%s ", $post_id));
+                    $SR_redirect_cache = new free_SR_redirect_cache();
+                    $SR_redirect_cache->free_cache();
+                }
+            }
         }
     }
 }
@@ -1518,7 +1471,7 @@ function WPSR_after_plugin_row($plugin_file, $plugin_data, $status)
 
     if (get_option('nsr_upgrade_message') != 'yes') {
         $class_name = $plugin_data['slug'];
-		$class_name = isset($plugin_data['slug']) ? $plugin_data['slug'] : 'seo-redirection'; 
+        $class_name = isset($plugin_data['slug']) ? $plugin_data['slug'] : 'seo-redirection';
 
         echo '<tr id="' . $class_name . '-plugin-update-tr" class="plugin-update-tr active">';
         echo '<td  colspan="6" class="plugin-update">';
@@ -1534,23 +1487,23 @@ function WPSR_after_plugin_row($plugin_file, $plugin_data, $status)
         ?>
 
         <script type="text/javascript">
-            jQuery(document).ready(function () {
-                var row = jQuery('#<?php echo $class_name;?>-plugin-update-tr').closest('tr').prev();
+            jQuery(document).ready(function() {
+                var row = jQuery('#<?php echo $class_name; ?>-plugin-update-tr').closest('tr').prev();
                 jQuery(row).addClass('update');
 
-                jQuery("#HideMe").click(function () {
+                jQuery("#HideMe").click(function() {
                     jQuery.ajax({
                         type: 'POST',
-                        url: '<?php echo admin_url();?>/admin-ajax.php',
+                        url: '<?php echo admin_url(); ?>/admin-ajax.php',
                         data: {
                             action: 'WPSR_HideMessageAjaxFunction'
                         },
-                        success: function (data, textStatus, XMLHttpRequest) {
+                        success: function(data, textStatus, XMLHttpRequest) {
 
-                            jQuery("#<?php echo $class_name;?>-upgradeMsg").hide();
+                            jQuery("#<?php echo $class_name; ?>-upgradeMsg").hide();
 
                         },
-                        error: function (MLHttpRequest, textStatus, errorThrown) {
+                        error: function(MLHttpRequest, textStatus, errorThrown) {
                             alert(errorThrown);
                         }
                     });
@@ -1559,7 +1512,7 @@ function WPSR_after_plugin_row($plugin_file, $plugin_data, $status)
             });
         </script>
 
-        <?php
+<?php
     }
 }
 
