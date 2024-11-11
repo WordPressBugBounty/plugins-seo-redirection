@@ -4,7 +4,7 @@ Plugin Name: SEO Redirection
 Plugin URI: https://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin/
 Description: By this plugin you can manage all your website redirection types easily.
 Author: wp-buy
-Version: 9.11
+Version: 9.12
 Author URI: https://www.wp-buy.com
 Text Domain: seo-redirection
 */
@@ -23,7 +23,7 @@ if (!defined('WP_SEO_REDIRECTION_OPTIONS')) {
 }
 
 if (!defined('WP_SEO_REDIRECTION_VERSION')) {
-    define('WP_SEO_REDIRECTION_VERSION', 9.4);
+    define('WP_SEO_REDIRECTION_VERSION', 9.12);
 }
 
 $util = new clogica_util_1();
@@ -36,9 +36,9 @@ add_action('wp', 'WPSR_redirect', 1);
 add_action('save_post', 'WPSR_get_post_redirection');
 add_action('add_meta_boxes', 'WPSR_adding_custom_meta_boxes', 10, 3);
 add_action('admin_head', 'WPSR_check_default_permalink');
-add_action('plugins_loaded', 'WPSR_upgrade');
-
+add_action('plugins_loaded', 'WPSR_check_and_upgrade');
 register_activation_hook(__FILE__, 'WPSR_upgrade');
+
 register_uninstall_hook(__FILE__, 'WPSR_uninstall');
 
 /////////////////////////////////////////////////////////////////////////
@@ -1075,16 +1075,27 @@ https://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin/</a>) <p
         echo __('<p><a href="https://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin" target="_blank"><img src="' . $imgpath . 'seopro.png" /></a></p>');
     }
 }
-if (!function_exists("WPSR_upgrade")) {
+function WPSR_check_and_upgrade()
+{
+    $util = new clogica_util_1();
+    $util->init('clogica_option_group', __FILE__); // Initialize the class
 
-    function WPSR_upgrade()
-    {
-        //Edited by Ibrahim Shatat 4/11/2024
-        //Make the upgrade statment to reach the latest version always & remove if clause
-        $util = new clogica_util_1();
-        WPSR_install();
-        $util->update_option('plugin_version', WP_SEO_REDIRECTION_VERSION);
+    $stored_version = $util->get_option_value('plugin_version');
+    $current_version = WP_SEO_REDIRECTION_VERSION;
+
+    // Run the upgrade only if the stored version is older
+    if (!$stored_version || version_compare($stored_version, $current_version, '<')) {
+        WPSR_upgrade();
     }
+}
+
+function WPSR_upgrade()
+{
+    $util = new clogica_util_1();
+    $util->init('clogica_option_group', __FILE__); // Initialize the class
+
+    WPSR_install(); // Custom installation/upgrade logic
+    $util->update_option('plugin_version', WP_SEO_REDIRECTION_VERSION); // Update version
 }
 
 //-----------------------------------------------------
@@ -1149,7 +1160,7 @@ if (!function_exists("WPSR_install")) {
             $sql = "CREATE TABLE IF NOT EXISTS `$table_name` (
                   `ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
                   `enabled` int(1) NOT NULL DEFAULT '1',
-                  `redirect_from` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+                  `redirect_from` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
                   `redirect_from_type` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
                   `redirect_from_folder_settings` int(1) NOT NULL,
                   `redirect_from_subfolders` int(1) NOT NULL DEFAULT '1',
@@ -1181,7 +1192,7 @@ if (!function_exists("WPSR_install")) {
                 $wpdb->query("ALTER TABLE $table_name ADD COLUMN import_flag tinyint(1) DEFAULT 0");
             }
 
-            $wpdb->query("ALTER TABLE $table_name CHANGE `redirect_from` `redirect_from` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;");
+            $wpdb->query("ALTER TABLE $table_name CHANGE `redirect_from` `redirect_from` VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;");
 
             // if the table exists
             $redirects = $wpdb->get_results(" select redirect_from,redirect_to,ID from $table_name; ");
