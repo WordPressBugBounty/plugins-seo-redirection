@@ -4,7 +4,7 @@ Plugin Name: SEO Redirection
 Plugin URI: https://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin/
 Description: By this plugin you can manage all your website redirection types easily.
 Author: wp-buy
-Version: 9.13
+Version: 9.14
 Author URI: https://www.wp-buy.com
 Text Domain: seo-redirection
 */
@@ -552,6 +552,33 @@ if (!function_exists("WPSR_log_404_redirection")) {
         $country = ""; //$util->get_visitor_country();
         $os = $util->get_visitor_OS();
         $browser = $util->get_visitor_Browser();
+		
+		
+		// Check if the request is from a known bot or suspicious source
+                $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+                $bots = ['bot', 'crawl', 'spider', 'slurp', 'Mediapartners-Google', 'AhrefsBot', 'SemrushBot', 'Bingbot', 'YandexBot'];
+                foreach ($bots as $bot) {
+                    if (stripos($user_agent, $bot) !== false) {
+                        return; // Ignore requests from bots
+                    }
+                }
+
+                // Check if the request is missing essential headers (likely non-browser)
+                if (empty($_SERVER['HTTP_ACCEPT']) || empty($_SERVER['HTTP_ACCEPT_LANGUAGE']) || empty($_SERVER['HTTP_USER_AGENT'])) {
+                    return; // Ignore suspicious requests without essential headers
+                }
+
+                // Check if the link belongs to the site's domain to avoid injected URLs
+                $parsed_link = parse_url($link);
+                $site_host = parse_url(home_url(), PHP_URL_HOST);
+                if (isset($parsed_link['host']) && $parsed_link['host'] !== $site_host) {
+                    return; // Ignore external or injected URLs
+                }
+
+                // Log the redirect
+		
+		
+		
 
         if ($os != 'Unknown' || $browser != 'Unknown') {
             $wpdb->query($wpdb->prepare(" insert IGNORE into $table_name(ctime,link,referrer,ip,country,os,browser) values(NOW(),%s,%s,%s,%s,%s,%s) ", $link, $referrer, $ip, $country, $os, $browser));
