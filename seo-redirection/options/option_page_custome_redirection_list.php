@@ -4,6 +4,17 @@ if (!defined('ABSPATH'))
 global $wpdb, $table_prefix, $util;
 $table_name = $table_prefix . 'WP_SEO_Redirection';
 
+if ($util->get('del') != '') {
+    $delid = intval($util->get('del'));
+    $wpdb->query($wpdb->prepare(" delete from $table_name where ID=%d ", $delid));
+
+    if ($util->there_is_cache() != '')
+        $util->info_option_msg(__("You have a cache plugin installed", 'wsr') . " <b>'" . $util->there_is_cache() . "'</b>, " . __("you have to clear cache after any changes to get the changes reflected immediately! ", 'wsr'));
+
+    $SR_redirect_cache = new free_SR_redirect_cache();
+    $SR_redirect_cache->free_cache();
+}
+
 $redirect_from = isset($_GET['redirect_from']) ? sanitize_text_field($_GET['redirect_from']) : '';
 
 // Check if `redirect_from` exists in the table
@@ -366,23 +377,23 @@ $redirect_to = isset($redirect_to) ? $redirect_to : '';
     $grid->add_php_col("<div class='db_redirect_from_type_background_db_enabled'><a target='_blank' href='db_redirect_from_url'>db_redirect_from</a></div>", __('Redirect from ', 'seo-redirection'));
     $grid->add_php_col("<div class='db_redirect_to_type_background_db_enabled'><a target='_blank' href='db_redirect_to_url'>db_redirect_to</a></div>", __('Redirect to ', 'seo-redirection'));
     $grid->add_data_col('redirect_type', __('Type', 'seo-redirection'));
-
+	$grid->add_data_col('hits', __('Hits', 'seo-redirection'));
 
     $url = admin_url('options-general.php?page=' . sanitize_text_field($_REQUEST['page']));
     $url .= isset($_REQUEST['tab']) ? '&tab=' . sanitize_text_field($_REQUEST['tab']) : '';
 
     if (isset($_REQUEST['sort']) && $_REQUEST['sort'] == 'asc') {
-        $grid->add_data_col('hits', '<a class="hit text-white" href="' . esc_url($url) . '&type=hits&sort=desc" data-sort="desc">Hits <span class="dashicons dashicons-arrow-up"></span></a>');
+       // $grid->add_data_col('hits', '<a class="hit text-white" href="' . esc_url($url) . '&type=hits&sort=desc" data-sort="desc">Hits <span class="dashicons dashicons-arrow-up"></span></a>');
         $grid->add_data_col('access_date', '<a href="' . esc_url($url) . '&type=dt&sort=desc" class="hit text-white" data-sort="desc">Last Access <span class="dashicons dashicons-arrow-up"></span></a>');
     } else if (isset($_REQUEST['sort']) && $_REQUEST['sort'] == 'desc') {
-        $grid->add_data_col('hits', '<a class="hit text-white" href="' . esc_url($url) . '&type=hits&sort=asc" data-sort="asc">Hits <span class="dashicons dashicons-arrow-up"></span></a>');
+      //  $grid->add_data_col('hits', '<a class="hit text-white" href="' . esc_url($url) . '&type=hits&sort=asc" data-sort="asc">Hits <span class="dashicons dashicons-arrow-up"></span></a>');
         $grid->add_data_col('access_date', '<a href="' . esc_url($url) . '&type=dt&sort=asc" class="dt text-white" data-sort="asc">Last Access <span class="dashicons dashicons-arrow-up"></span></a>');
     } else {
-        $grid->add_data_col('hits', '<a class="hit text-white" href="' . esc_url($url) . '&type=hits&sort=asc" data-sort="asc">Hits <span class="dashicons dashicons-arrow-up"></span></a>');
+      //  $grid->add_data_col('hits', '<a class="hit text-white" href="' . esc_url($url) . '&type=hits&sort=asc" data-sort="asc">Hits <span class="dashicons dashicons-arrow-up"></span></a>');
         $grid->add_data_col('access_date', '<a href="' . esc_url($url) . '&type=dt&sort=asc" class="dt text-white" data-sort="asc">Last Access <span class="dashicons dashicons-arrow-up"></span></a>');
     }
 
-    //$grid->add_template_col( $util->WPSR_get_current_parameters('del') . '&del={db_ID}', __('Actions', 'seo-redirection'));
+    $grid->add_template_col( $util->WPSR_get_current_parameters('del') . '&del={db_ID}', __('Actions', 'seo-redirection'));
     $grid->add_template_col('edit', '{db_ID}', __('', 'seo-redirection'));
     $grid->run();
     ?>
