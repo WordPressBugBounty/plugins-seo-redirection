@@ -7,7 +7,7 @@ $imgpath = $util->get_plugin_url() . 'custom/images/';
 <div class="row">
     <div class="col-sm-12">
         <p><?php _e('We recommend before contacting us and wait for reply, to explore the product page in our knowledge base, it contains many articles about how to use the plugin', 'seo-redirection') ?><br />
-            <b><?php _e("To go to the", 'seo-redirection') ?> <a target="_blank" href="http://www.clogica.com/kb/topics/seo-redirection-premium"><?php _e("knowledge base click here", "seo-redirection") ?></a></b>
+            <b><?php _e("To go to the", 'seo-redirection') ?> <a target="_blank" href="https://www.wp-buy.com/knowledge-base/category/seo-redirection-free-plugin/"><?php _e("knowledge base click here", "seo-redirection") ?></a></b>
         </p>
         <br />
         <h2 style="display: inline; color: #636465; font-size:24px"><b><?php _e("Open a new ticket?", "seo-redirection") ?></b></h2>

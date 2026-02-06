@@ -1,13 +1,6 @@
 <?php
-/*
-Author: Fakhri Alsadi
-Date: 16-7-2010
-Contact: www.clogica.com   info@clogica.com    mobile: +972599322252
-*/
 
-///@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-///@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-////  class dropdown     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+////  class dropdown
 /*
 A simple class to create Drop down lists easily using PHP
 

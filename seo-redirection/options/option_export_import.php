@@ -265,7 +265,7 @@ if ( isset($_POST['btn_import']) && $_POST['btn_import'] != '') {
     </div>
     <br/>
     <h3><a target="_blank" href="<?php echo WPSR_URL . 'custom/export/sample.csv' ?>">Sample Csv File</a></h3>
-    <div style="text-align: right"><?php _e("* Need Help?", 'seo-redirection'); ?> <a target="_blank" href="http://www.clogica.com/kb/topics/seo-redirection-premium/export-import"><?php _e("click here to see info about import and export", "seo-redirection"); ?></a></div>
+    <div style="text-align: right"><?php _e("* Need Help?", 'seo-redirection'); ?> <a target="_blank" href="https://www.wp-buy.com/knowledge-base/category/seo-redirection-free-plugin/"><?php _e("click here to see info about import and export", "seo-redirection"); ?></a></div>
     <br/>
 </form>
 

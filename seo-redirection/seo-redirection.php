@@ -4,7 +4,7 @@ Plugin Name: SEO Redirection
 Plugin URI: https://www.wp-buy.com/product/seo-redirection-premium-wordpress-plugin/
 Description: By this plugin you can manage all your website redirection types easily.
 Author: wp-buy
-Version: 9.15
+Version: 9.16
 Author URI: https://www.wp-buy.com
 Text Domain: seo-redirection
 */
@@ -59,6 +59,7 @@ if (!function_exists("WPSR__filter_action_links")) {
 if (!function_exists("WPSR_add_link_to_admin_bar")) {
     function WPSR_add_link_to_admin_bar($wp_admin_bar)
     {
+		 global $util;
 
         if (current_user_can('manage_options')) {
 
@@ -72,10 +73,12 @@ if (!function_exists("WPSR_add_link_to_admin_bar")) {
 
             $current_url = (is_ssl() ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             $relative_url = str_replace(home_url(), '', $current_url);
+			
+			$imgpath = $util->get_plugin_url() . 'custom/images/';
 
             $wp_admin_bar->add_node(array(
                 'id'    => 'seo_redirection',
-                'title' => '<img src="' . plugins_url('icon.png', __FILE__) . '" style="width: 20px; height: 20px; vertical-align: middle;" alt="Icon" /> SEO Redirection',
+                'title' => '<img src="' . $imgpath . 'icon.png" style="width: 20px; height: 20px; vertical-align: middle;" alt="Icon" /> SEO Redirection',
                 'href'  => '#',
                 'meta'  => array(
                     'class' => 'seo-redirection-admin-bar',  // Add a custom CSS class
@@ -221,22 +224,25 @@ if (!function_exists('wpsr_dashboard_notice')) {
 
     function wpsr_dashboard_notice()
     {
+		 global $util;
         // Get the total number of 404 errors
         $total_404_errors = WPSR_Get_total_404();
 
         // Only show the notice if there are more than 100 broken links and if the user has not dismissed it
         if ($total_404_errors > 100 && !get_user_meta(get_current_user_id(), 'wpsr_404_notice_dismissed')) {
             // Image URL for the icon (Replace with your own uploaded image or the default WordPress icon)
-            $icon_url = plugins_url('icon.png', __FILE__);
+            
+			$icon_url = $util->get_plugin_url() . 'custom/images/';
 
             // Message content with buttons
             $message = __('<strong>SEO Redirection</strong>: You have', 'seo-redirection') . ' <b style="color:red;     padding:3px;">' . intval($total_404_errors) . '</b>' . __(' broken links (404). Manage them now to fix the issue and improve your site\'s SEO performance.', 'seo-redirection');
-
+			
+			$imgpath = $util->get_plugin_url() . 'custom/images/';
             // Display the message with inline styles
             echo '
             <div class="notice notice-error is-dismissible wpsr-404-notice" style="border-left: 4px solid red;  display: flex; align-items: center;">
                 <div style="display: flex; align-items: center;">
-                    <img src="' . esc_url($icon_url) . '" style="margin-right: 15px; width: 40px; height: 40px;" alt="Error icon" />
+                    <img src="' . $imgpath . 'icon.png" style="margin-right: 15px; width: 40px; height: 40px;" alt="Error icon" />
                     <div>
                         <p>' . $message . '</p>
                         <p>

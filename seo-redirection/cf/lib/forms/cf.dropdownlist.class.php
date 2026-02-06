@@ -1,22 +1,5 @@
 <?php
-/*
-	Author: Fakhri Alsadi
-	Date: 16-7-2010
-	Contact: www.clogica.com   info@clogica.com
-	A simple class to create Drop down lists easily using PHP
-	----------------------------------------------------------
-	example:
-	----------------------------------------------------------
-	$drop = new dropdownlist('gendar');
-	$drop->add('mail','mail');`
-	$drop->add('femail','femail');
-	$drop->run();
-	$drop->select('femail');
-	//////////////////////////////
-	$drop = new dropdownlist('gendar');
-	$drop->data_bind('data_status');
-	$drop->run();
-*/
+
 
 if(!class_exists('dropdown_list')){
 class dropdown_list{

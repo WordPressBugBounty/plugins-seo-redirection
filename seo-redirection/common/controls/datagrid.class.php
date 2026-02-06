@@ -438,45 +438,44 @@ class datagrid
 			
 				}else if(array_key_exists('html',$this->cols[$i]) && $this->cols[$i]['html']!='')
 				{
-					$html = $this->cols[$i]['html'];
-					foreach ($ar as $key => $value)
-					{
-						$key_var = "db_" . $key;
-						$html=str_ireplace('{' . $key_var . '}', $$key_var , $html);
+					$html = $this->cols[$i]['html'] ?? '';
+					if (is_array($ar)) {
+						foreach ($ar as $key => $value) {
+							$key_var = "db_" . $key;
+							$html = str_ireplace('{' . $key_var . '}', ${$key_var} ?? '', $html);
+						}
 					}
+					$row[$i] = $html;
 
-					$row[$i]= $html;					
-				
-				}else if(array_key_exists('template',$this->cols[$i]) && $this->cols[$i]['template']!='')
+				} else if (!empty($this->cols[$i]['template'])) {
 
-				{
 					global $template;
 					$temp = $this->cols[$i]['template'];
-					$params = $this->cols[$i]['param'];
-					$content = $template[$temp]['content'];
-					if(is_array($params))
-					for($j=0;$j<count($params);$j++)
-					{
-						$content=str_ireplace('{param' . $j . '}', $params[$j]  , $content);
-					}else
-					{
-						$content=str_ireplace('{param}' , $params , $content);
+					$params = $this->cols[$i]['param'] ?? [];
+					$content = $template[$temp]['content'] ?? '';
 
-					}
-					if(is_array($template[$temp]['options']))
-					{
-						foreach ($template[$temp]['options'] as $key => $value )
-						{
-							$this->set_col_attr($i+1,$key,$value);
+					if (is_array($params)) {
+						foreach ($params as $j => $p) {
+							$content = str_ireplace('{param' . $j . '}', $p ?? '', $content);
 						}
+					} else {
+						$content = str_ireplace('{param}', $params, $content);
+					}
 
+					if (!empty($template[$temp]['options']) && is_array($template[$temp]['options'])) {
+						foreach ($template[$temp]['options'] as $key => $value) {
+							$this->set_col_attr($i + 1, $key, $value);
+						}
 					}
-					foreach ($ar as $key => $value)
-					{
-						$key_var = "db_" . $key;
-						$content = str_ireplace('{' . $key_var . '}', $$key_var ?? '', $content);
+
+					if (is_array($ar)) {
+						foreach ($ar as $key => $value) {
+							$key_var = "db_" . $key;
+							$content = str_ireplace('{' . $key_var . '}', ${$key_var} ?? '', $content);
+						}
 					}
-					$row[$i]= $content;
+
+					$row[$i] = $content;
 				}
 			}
 			

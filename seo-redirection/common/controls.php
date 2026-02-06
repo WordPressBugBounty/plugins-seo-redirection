@@ -1,10 +1,4 @@
 <?php
-/*
-Author: Fakhri Alsadi
-Date: 16-7-2010
-Contact: www.clogica.com   info@clogica.com    mobile: +972599322252
-
-*/
 
 include_once "util.php";
 include_once "controls/datagrid.class.php";
